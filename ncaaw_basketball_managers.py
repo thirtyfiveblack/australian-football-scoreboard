@@ -17,7 +17,7 @@ ESPN_NCAAWB_SCOREBOARD_URL = (
 )
 
 
-class BaseNCAAWBasketballManager(Basketball):
+class BaseNCAAWBasketballManager(AustralianFootball):
     """Base class for NCAA Women's Basketball managers with common functionality."""
 
     # Class variables for warning tracking
@@ -271,7 +271,7 @@ class BaseNCAAWBasketballManager(Basketball):
             return data
 
 
-class NCAAWBasketballLiveManager(BaseNCAAWBasketballManager, BasketballLive):
+class NCAAWBasketballLiveManager(BaseNCAAWBasketballManager, AustralianFootballLive):
     """Manager for live NCAA Women's Basketball games."""
 
     def __init__(self, config: Dict[str, Any], display_manager, cache_manager):
