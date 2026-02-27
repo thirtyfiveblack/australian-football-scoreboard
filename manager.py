@@ -1,7 +1,7 @@
 """
-Basketball Scoreboard Plugin for LEDMatrix - Using Existing Managers
+Australian Football Scoreboard Plugin for LEDMatrix - Using Existing Managers
 
-This plugin provides NBA, WNBA, NCAA Men's, and NCAA Women's basketball scoreboard 
+This plugin provides AFL Australian Football scoreboard 
 functionality by reusing proven, working manager classes.
 """
 
@@ -31,8 +31,8 @@ except ImportError:
     SCROLL_AVAILABLE = False
 
 # Import the manager classes
-from nba_managers import NBALiveManager, NBARecentManager, NBAUpcomingManager
-from wnba_managers import WNBALiveManager, WNBARecentManager, WNBAUpcomingManager
+from afl_managers import AFLLiveManager, AFLRecentManager, AFLUpcomingManager
+from wafl_managers import WAFLLiveManager, WAFLRecentManager, WAFLUpcomingManager
 from ncaam_basketball_managers import (
     NCAAMBasketballLiveManager,
     NCAAMBasketballRecentManager,
@@ -47,11 +47,11 @@ from ncaaw_basketball_managers import (
 logger = logging.getLogger(__name__)
 
 
-class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
+class AustralianFootballScoreboardPlugin(BasePlugin if BasePlugin else object):
     """
-    Basketball scoreboard plugin using existing manager classes.
+    Australian Football scoreboard plugin using existing manager classes.
 
-    This plugin provides NBA, WNBA, NCAA Men's, and NCAA Women's basketball 
+    This plugin provides AFL Australian Football 
     scoreboard functionality by delegating to proven manager classes.
     """
 
@@ -88,16 +88,16 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
             self.display_height = getattr(display_manager, "height", 32)
 
         # League configurations
-        self.logger.debug(f"Basketball plugin received config keys: {list(config.keys())}")
-        self.logger.debug(f"NBA config: {config.get('nba', {})}")
+        self.logger.debug(f"Australian Football plugin received config keys: {list(config.keys())}")
+        self.logger.debug(f"AFL config: {config.get('afl', {})}")
         
-        self.nba_enabled = config.get("nba", {}).get("enabled", False)
-        self.wnba_enabled = config.get("wnba", {}).get("enabled", False)
+        self.afl_enabled = config.get("afl", {}).get("enabled", False)
+        self.wafl_enabled = config.get("wafl", {}).get("enabled", False)
         self.ncaam_enabled = config.get("ncaam", {}).get("enabled", False)
         self.ncaaw_enabled = config.get("ncaaw", {}).get("enabled", False)
         
         self.logger.info(
-            f"League enabled states - NBA: {self.nba_enabled}, WNBA: {self.wnba_enabled}, "
+            f"League enabled states - AFL: {self.afl_enabled}, WAFL: {self.wafl_enabled}, "
             f"NCAA Men's: {self.ncaam_enabled}, NCAA Women's: {self.ncaaw_enabled}"
         )
 
@@ -106,8 +106,8 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         self.game_display_duration = float(config.get("game_display_duration", 15))
 
         # Live priority per league
-        self.nba_live_priority = self.config.get("nba", {}).get("live_priority", False)
-        self.wnba_live_priority = self.config.get("wnba", {}).get("live_priority", False)
+        self.afl_live_priority = self.config.get("afl", {}).get("live_priority", False)
+        self.wafl_live_priority = self.config.get("wafl", {}).get("live_priority", False)
         self.ncaam_live_priority = self.config.get("ncaam", {}).get("live_priority", False)
         self.ncaaw_live_priority = self.config.get("ncaaw", {}).get("live_priority", False)
 
@@ -166,10 +166,10 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         self.modes = self._get_available_modes()
 
         self.logger.info(
-            f"Basketball scoreboard plugin initialized - {self.display_width}x{self.display_height}"
+            f"Australian Football scoreboard plugin initialized - {self.display_width}x{self.display_height}"
         )
         self.logger.info(
-            f"NBA enabled: {self.nba_enabled}, WNBA enabled: {self.wnba_enabled}, "
+            f"AFL enabled: {self.afl_enabled}, WAFL enabled: {self.wafl_enabled}, "
             f"NCAA Men's enabled: {self.ncaam_enabled}, NCAA Women's enabled: {self.ncaaw_enabled}"
         )
 
@@ -206,7 +206,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         self._game_transition_log_interval: float = 1.0  # Minimum seconds between game transition logs
         
         # Track mode start times for per-mode duration enforcement
-        # Format: {display_mode: start_time} (e.g., {'nba_recent': 1234567890.0})
+        # Format: {display_mode: start_time} (e.g., {'afl_recent': 1234567890.0})
         # Reset when mode changes or full cycle completes
         self._mode_start_time: Dict[str, float] = {}
         
@@ -214,43 +214,43 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         self._display_mode_settings = self._parse_display_mode_settings()
         
         # Track current display context for granular dynamic duration
-        self._current_display_league: Optional[str] = None  # 'nba', 'wnba', 'ncaam', 'ncaaw'
+        self._current_display_league: Optional[str] = None  # 'afl', 'wafl', 'ncaam', 'ncaaw'
         self._current_display_mode_type: Optional[str] = None  # 'live', 'recent', 'upcoming'
 
     def _initialize_managers(self):
         """Initialize all manager instances."""
         try:
             # Create adapted configs for managers
-            nba_config = self._adapt_config_for_manager("nba")
-            wnba_config = self._adapt_config_for_manager("wnba")
+            afl_config = self._adapt_config_for_manager("afl")
+            wafl_config = self._adapt_config_for_manager("wafl")
             ncaam_config = self._adapt_config_for_manager("ncaam")
             ncaaw_config = self._adapt_config_for_manager("ncaaw")
 
-            # Initialize NBA managers if enabled
-            if self.nba_enabled:
-                self.nba_live = NBALiveManager(
-                    nba_config, self.display_manager, self.cache_manager
+            # Initialize AFL managers if enabled
+            if self.afl_enabled:
+                self.afl_live = AFLLiveManager(
+                    afl_config, self.display_manager, self.cache_manager
                 )
-                self.nba_recent = NBARecentManager(
-                    nba_config, self.display_manager, self.cache_manager
+                self.afl_recent = AFLRecentManager(
+                    afl_config, self.display_manager, self.cache_manager
                 )
-                self.nba_upcoming = NBAUpcomingManager(
-                    nba_config, self.display_manager, self.cache_manager
+                self.afl_upcoming = AFLUpcomingManager(
+                    afl_config, self.display_manager, self.cache_manager
                 )
-                self.logger.info("NBA managers initialized")
+                self.logger.info("AFL managers initialized")
 
-            # Initialize WNBA managers if enabled
-            if self.wnba_enabled:
-                self.wnba_live = WNBALiveManager(
-                    wnba_config, self.display_manager, self.cache_manager
+            # Initialize WAFL managers if enabled
+            if self.wafl_enabled:
+                self.wafl_live = WAFLLiveManager(
+                    wafl_config, self.display_manager, self.cache_manager
                 )
-                self.wnba_recent = WNBARecentManager(
-                    wnba_config, self.display_manager, self.cache_manager
+                self.wafl_recent = WAFLRecentManager(
+                    wafl_config, self.display_manager, self.cache_manager
                 )
-                self.wnba_upcoming = WNBAUpcomingManager(
-                    wnba_config, self.display_manager, self.cache_manager
+                self.wafl_upcoming = WAFLUpcomingManager(
+                    wafl_config, self.display_manager, self.cache_manager
                 )
-                self.logger.info("WNBA managers initialized")
+                self.logger.info("WAFL managers initialized")
 
             # Initialize NCAA Men's managers if enabled
             if self.ncaam_enabled:
@@ -308,34 +308,34 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         This design allows the display logic to iterate through leagues in priority
         order without hardcoding league names throughout the codebase.
         """
-        # NBA league entry - highest priority (1)
-        self._league_registry['nba'] = {
-            'enabled': self.nba_enabled,
+        # AFL league entry - highest priority (1)
+        self._league_registry['afl'] = {
+            'enabled': self.afl_enabled,
             'priority': 1,  # Highest priority - shows first
-            'live_priority': self.nba_live_priority,
+            'live_priority': self.afl_live_priority,
             'managers': {
-                'live': getattr(self, 'nba_live', None),
-                'recent': getattr(self, 'nba_recent', None),
-                'upcoming': getattr(self, 'nba_upcoming', None),
+                'live': getattr(self, 'afl_live', None),
+                'recent': getattr(self, 'afl_recent', None),
+                'upcoming': getattr(self, 'afl_upcoming', None),
             }
         }
         
-        # WNBA league entry - second priority (2)
-        self._league_registry['wnba'] = {
-            'enabled': self.wnba_enabled,
-            'priority': 2,  # Second priority - shows after NBA
-            'live_priority': self.wnba_live_priority,
+        # WAFL league entry - second priority (2)
+        self._league_registry['wafl'] = {
+            'enabled': self.wafl_enabled,
+            'priority': 2,  # Second priority - shows after AFL
+            'live_priority': self.wafl_live_priority,
             'managers': {
-                'live': getattr(self, 'wnba_live', None),
-                'recent': getattr(self, 'wnba_recent', None),
-                'upcoming': getattr(self, 'wnba_upcoming', None),
+                'live': getattr(self, 'wafl_live', None),
+                'recent': getattr(self, 'wafl_recent', None),
+                'upcoming': getattr(self, 'wafl_upcoming', None),
             }
         }
         
-        # NCAA Men's Basketball league entry - third priority (3)
+        # NCAA Men's Australian Football league entry - third priority (3)
         self._league_registry['ncaam'] = {
             'enabled': self.ncaam_enabled,
-            'priority': 3,  # Third priority - shows after WNBA
+            'priority': 3,  # Third priority - shows after WAFL
             'live_priority': self.ncaam_live_priority,
             'managers': {
                 'live': getattr(self, 'ncaam_live', None),
@@ -344,7 +344,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
             }
         }
         
-        # NCAA Women's Basketball league entry - fourth priority (4)
+        # NCAA Women's Australian Football league entry - fourth priority (4)
         self._league_registry['ncaaw'] = {
             'enabled': self.ncaaw_enabled,
             'priority': 4,  # Fourth priority - shows after NCAA Men's
@@ -384,7 +384,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
             
         Returns:
             List of league IDs in priority order (lower priority number = higher priority)
-            Example: ['nba', 'wnba'] means NBA shows first, then WNBA
+            Example: ['afl', 'wafl'] means AFL shows first, then WAFL
             
         This is the core method for sequential block display - it determines
         which leagues should be shown and in what order.
@@ -513,7 +513,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         more maintainable and easier to extend.
         
         Args:
-            league_id: League identifier ('nba', 'wnba', 'ncaam', 'ncaaw', etc.)
+            league_id: League identifier ('afl', 'wafl', 'ncaam', 'ncaaw', etc.)
             mode_type: Mode type ('live', 'recent', or 'upcoming')
             
         Returns:
@@ -547,7 +547,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         have been shown for their full duration (tracked via dynamic duration system).
         
         Args:
-            league_id: League identifier ('nba', 'wnba', 'ncaam', 'ncaaw', etc.)
+            league_id: League identifier ('afl', 'wafl', 'ncaam', 'ncaaw', etc.)
             mode_type: Mode type ('live', 'recent', or 'upcoming')
             
         Returns:
@@ -584,12 +584,12 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         
         Returns:
             Dict mapping league -> game_type -> display_mode ('switch' or 'scroll')
-            e.g., {'nba': {'live': 'switch', 'recent': 'switch', 'upcoming': 'switch'}}
+            e.g., {'afl': {'live': 'switch', 'recent': 'switch', 'upcoming': 'switch'}}
             Currently returns 'switch' for all (scroll mode not implemented)
         """
         settings = {}
         
-        for league in ['nba', 'wnba', 'ncaam', 'ncaaw']:
+        for league in ['afl', 'wafl', 'ncaam', 'ncaaw']:
             league_config = self.config.get(league, {})
             display_modes_config = league_config.get("display_modes", {})
             
@@ -608,7 +608,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         Get the display mode for a specific league and game type.
         
         Args:
-            league: 'nba', 'wnba', 'ncaam', or 'ncaaw'
+            league: 'afl', 'wafl', 'ncaam', or 'ncaaw'
             game_type: 'live', 'recent', or 'upcoming'
             
         Returns:
@@ -623,7 +623,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         """Extract mode type (live, recent, upcoming) from display mode string.
         
         Args:
-            display_mode: Display mode string (e.g., 'basketball_live', 'nba_recent')
+            display_mode: Display mode string (e.g., 'basketball_live', 'afl_recent')
             
         Returns:
             Mode type string ('live', 'recent', 'upcoming') or None
@@ -641,11 +641,11 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         
         Resolves duration using the following hierarchy:
         1. Manager's game_display_duration attribute (if manager provided)
-        2. League-specific mode duration (e.g., nba.live_game_duration from display_durations.live)
+        2. League-specific mode duration (e.g., afl.live_game_duration from display_durations.live)
         3. League-specific default (15 seconds)
         
         Args:
-            league: League name ('nba', 'wnba', 'ncaam', or 'ncaaw')
+            league: League name ('afl', 'wafl', 'ncaam', or 'ncaaw')
             mode_type: Mode type ('live', 'recent', or 'upcoming')
             manager: Optional manager instance (if provided, checks manager's game_display_duration)
             
@@ -683,7 +683,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         Returns None if not configured (uses dynamic calculation).
         
         Args:
-            league: League name ('nba', 'wnba', 'ncaam', or 'ncaaw')
+            league: League name ('afl', 'wafl', 'ncaam', or 'ncaaw')
             mode_type: Mode type ('live', 'recent', or 'upcoming')
             
         Returns:
@@ -709,8 +709,8 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         """
         Adapt plugin config format to manager expected format.
 
-        Plugin uses: nba: {...}, wnba: {...}, etc.
-        Managers expect: nba_scoreboard: {...}, wnba_scoreboard: {...}, etc.
+        Plugin uses: afl: {...}, wafl: {...}, etc.
+        Managers expect: afl_scoreboard: {...}, wafl_scoreboard: {...}, etc.
         """
         league_config = self.config.get(league, {})
         
@@ -858,13 +858,13 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                     modes.append(f"{league_id}_{mode_type}")
                     self.logger.debug(f"Added mode: {league_id}_{mode_type}")
 
-        # Default to NBA if no leagues enabled
+        # Default to AFL if no leagues enabled
         if not modes:
-            modes = ["nba_recent", "nba_upcoming", "nba_live"]
+            modes = ["afl_recent", "afl_upcoming", "afl_live"]
 
         self.logger.info(
             f"Available modes generated: {len(modes)} mode(s) - {modes}. "
-            f"Enabled leagues: NBA={self.nba_enabled}, WNBA={self.wnba_enabled}, "
+            f"Enabled leagues: AFL={self.afl_enabled}, WAFL={self.wafl_enabled}, "
             f"NCAA Men's={self.ncaam_enabled}, NCAA Women's={self.ncaaw_enabled}"
         )
         return modes
@@ -876,27 +876,27 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
 
         current_mode = self.modes[self.current_mode_index]
 
-        if current_mode.startswith("nba_"):
-            if not self.nba_enabled:
+        if current_mode.startswith("afl_"):
+            if not self.afl_enabled:
                 return None
             mode_type = current_mode.split("_", 1)[1]  # "live", "recent", "upcoming"
             if mode_type == "live":
-                return self.nba_live
+                return self.afl_live
             elif mode_type == "recent":
-                return self.nba_recent
+                return self.afl_recent
             elif mode_type == "upcoming":
-                return self.nba_upcoming
+                return self.afl_upcoming
 
-        elif current_mode.startswith("wnba_"):
-            if not self.wnba_enabled:
+        elif current_mode.startswith("wafl_"):
+            if not self.wafl_enabled:
                 return None
             mode_type = current_mode.split("_", 1)[1]
             if mode_type == "live":
-                return self.wnba_live
+                return self.wafl_live
             elif mode_type == "recent":
-                return self.wnba_recent
+                return self.wafl_recent
             elif mode_type == "upcoming":
-                return self.wnba_upcoming
+                return self.wafl_upcoming
 
         elif current_mode.startswith("ncaam_"):
             if not self.ncaam_enabled:
@@ -930,18 +930,18 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         # Collect all manager update tasks
         update_tasks = []
         
-        if self.nba_enabled:
+        if self.afl_enabled:
             update_tasks.extend([
-                ("NBA Live", self.nba_live.update),
-                ("NBA Recent", self.nba_recent.update),
-                ("NBA Upcoming", self.nba_upcoming.update),
+                ("AFL Live", self.afl_live.update),
+                ("AFL Recent", self.afl_recent.update),
+                ("AFL Upcoming", self.afl_upcoming.update),
             ])
         
-        if self.wnba_enabled:
+        if self.wafl_enabled:
             update_tasks.extend([
-                ("WNBA Live", self.wnba_live.update),
-                ("WNBA Recent", self.wnba_recent.update),
-                ("WNBA Upcoming", self.wnba_upcoming.update),
+                ("WAFL Live", self.wafl_live.update),
+                ("WAFL Recent", self.wafl_recent.update),
+                ("WAFL Upcoming", self.wafl_upcoming.update),
             ])
         
         if self.ncaam_enabled:
@@ -1011,9 +1011,9 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                 
                 self.logger.debug(f"Display called with mode: {display_mode}")
                 
-                # Check if this is a granular mode (league-specific, e.g., ncaam_recent, nba_live)
+                # Check if this is a granular mode (league-specific, e.g., ncaam_recent, afl_live)
                 # Granular modes: {league}_{mode_type} format
-                # Known league prefixes: nba, wnba, ncaam, ncaaw
+                # Known league prefixes: afl, wafl, ncaam, ncaaw
                 league = None
                 mode_type = None
                 
@@ -1065,8 +1065,8 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                     return False
                 
                 self.logger.debug(
-                    f"Legacy combined mode: mode_type={mode_type}, NBA enabled: {self.nba_enabled}, "
-                    f"WNBA enabled: {self.wnba_enabled}, NCAA Men's enabled: {self.ncaam_enabled}, "
+                    f"Legacy combined mode: mode_type={mode_type}, AFL enabled: {self.afl_enabled}, "
+                    f"WAFL enabled: {self.wafl_enabled}, NCAA Men's enabled: {self.ncaam_enabled}, "
                     f"NCAA Women's enabled: {self.ncaaw_enabled}"
                 )
                 
@@ -1075,16 +1075,16 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                 managers_to_try = []
                 
                 if mode_type == 'live':
-                    # Check NBA first (highest priority)
-                    if (self.nba_enabled and self.nba_live_priority and 
-                        hasattr(self, 'nba_live') and 
-                        bool(getattr(self.nba_live, 'live_games', []))):
-                        managers_to_try.append(self.nba_live)
-                    # Check WNBA
-                    if (self.wnba_enabled and self.wnba_live_priority and 
-                        hasattr(self, 'wnba_live') and 
-                        bool(getattr(self.wnba_live, 'live_games', []))):
-                        managers_to_try.append(self.wnba_live)
+                    # Check AFL first (highest priority)
+                    if (self.afl_enabled and self.afl_live_priority and 
+                        hasattr(self, 'afl_live') and 
+                        bool(getattr(self.afl_live, 'live_games', []))):
+                        managers_to_try.append(self.afl_live)
+                    # Check WAFL
+                    if (self.wafl_enabled and self.wafl_live_priority and 
+                        hasattr(self, 'wafl_live') and 
+                        bool(getattr(self.wafl_live, 'live_games', []))):
+                        managers_to_try.append(self.wafl_live)
                     # Check NCAA Men's
                     if (self.ncaam_enabled and self.ncaam_live_priority and 
                         hasattr(self, 'ncaam_live') and 
@@ -1098,28 +1098,28 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                     
                     # Fallback: if no live content, show any enabled live manager
                     if not managers_to_try:
-                        if self.nba_enabled and hasattr(self, 'nba_live'):
-                            managers_to_try.append(self.nba_live)
-                        elif self.wnba_enabled and hasattr(self, 'wnba_live'):
-                            managers_to_try.append(self.wnba_live)
+                        if self.afl_enabled and hasattr(self, 'afl_live'):
+                            managers_to_try.append(self.afl_live)
+                        elif self.wafl_enabled and hasattr(self, 'wafl_live'):
+                            managers_to_try.append(self.wafl_live)
                         elif self.ncaam_enabled and hasattr(self, 'ncaam_live'):
                             managers_to_try.append(self.ncaam_live)
                         elif self.ncaaw_enabled and hasattr(self, 'ncaaw_live'):
                             managers_to_try.append(self.ncaaw_live)
                 else:
                     # For recent and upcoming modes, use standard priority order
-                    # NBA > WNBA > NCAA Men's > NCAA Women's
-                    if self.nba_enabled:
-                        if mode_type == 'recent' and hasattr(self, 'nba_recent'):
-                            managers_to_try.append(self.nba_recent)
-                        elif mode_type == 'upcoming' and hasattr(self, 'nba_upcoming'):
-                            managers_to_try.append(self.nba_upcoming)
+                    # AFL > WAFL > NCAA Men's > NCAA Women's
+                    if self.afl_enabled:
+                        if mode_type == 'recent' and hasattr(self, 'afl_recent'):
+                            managers_to_try.append(self.afl_recent)
+                        elif mode_type == 'upcoming' and hasattr(self, 'afl_upcoming'):
+                            managers_to_try.append(self.afl_upcoming)
                     
-                    if self.wnba_enabled:
-                        if mode_type == 'recent' and hasattr(self, 'wnba_recent'):
-                            managers_to_try.append(self.wnba_recent)
-                        elif mode_type == 'upcoming' and hasattr(self, 'wnba_upcoming'):
-                            managers_to_try.append(self.wnba_upcoming)
+                    if self.wafl_enabled:
+                        if mode_type == 'recent' and hasattr(self, 'wafl_recent'):
+                            managers_to_try.append(self.wafl_recent)
+                        elif mode_type == 'upcoming' and hasattr(self, 'wafl_upcoming'):
+                            managers_to_try.append(self.wafl_upcoming)
                     
                     if self.ncaam_enabled:
                         if mode_type == 'recent' and hasattr(self, 'ncaam_recent'):
@@ -1140,10 +1140,10 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                 for current_manager in managers_to_try:
                     if current_manager:
                         # Track which league we're displaying for granular dynamic duration
-                        if hasattr(self, 'nba_live') and (current_manager == self.nba_live or current_manager == self.nba_recent or current_manager == self.nba_upcoming):
-                            self._current_display_league = 'nba'
-                        elif hasattr(self, 'wnba_live') and (current_manager == self.wnba_live or current_manager == self.wnba_recent or current_manager == self.wnba_upcoming):
-                            self._current_display_league = 'wnba'
+                        if hasattr(self, 'afl_live') and (current_manager == self.afl_live or current_manager == self.afl_recent or current_manager == self.afl_upcoming):
+                            self._current_display_league = 'afl'
+                        elif hasattr(self, 'wafl_live') and (current_manager == self.wafl_live or current_manager == self.wafl_recent or current_manager == self.wafl_upcoming):
+                            self._current_display_league = 'wafl'
                         elif hasattr(self, 'ncaam_live') and (current_manager == self.ncaam_live or current_manager == self.ncaam_recent or current_manager == self.ncaam_upcoming):
                             self._current_display_league = 'ncaam'
                         elif hasattr(self, 'ncaaw_live') and (current_manager == self.ncaaw_live or current_manager == self.ncaaw_recent or current_manager == self.ncaaw_upcoming):
@@ -1187,7 +1187,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                 if not managers_to_try:
                     self.logger.warning(
                         f"No managers available for mode: {display_mode} "
-                        f"(NBA: {self.nba_enabled}, WNBA: {self.wnba_enabled}, "
+                        f"(AFL: {self.afl_enabled}, WAFL: {self.wafl_enabled}, "
                         f"NCAA Men's: {self.ncaam_enabled}, NCAA Women's: {self.ncaaw_enabled})"
                     )
                 else:
@@ -1238,11 +1238,11 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                 # Track which league/mode we're displaying for granular dynamic duration
                 current_mode = self.modes[self.current_mode_index] if self.modes else None
                 if current_mode:
-                    if current_mode.startswith("nba_"):
-                        self._current_display_league = 'nba'
+                    if current_mode.startswith("afl_"):
+                        self._current_display_league = 'afl'
                         self._current_display_mode_type = current_mode.split("_", 1)[1]
-                    elif current_mode.startswith("wnba_"):
-                        self._current_display_league = 'wnba'
+                    elif current_mode.startswith("wafl_"):
+                        self._current_display_league = 'wafl'
                         self._current_display_mode_type = current_mode.split("_", 1)[1]
                     elif current_mode.startswith("ncaam_"):
                         self._current_display_league = 'ncaam'
@@ -1279,8 +1279,8 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         if not self.is_enabled:
             return False
         return (
-            (self.nba_enabled and self.nba_live_priority)
-            or (self.wnba_enabled and self.wnba_live_priority)
+            (self.afl_enabled and self.afl_live_priority)
+            or (self.wafl_enabled and self.wafl_live_priority)
             or (self.ncaam_enabled and self.ncaam_live_priority)
             or (self.ncaaw_enabled and self.ncaaw_live_priority)
         )
@@ -1289,63 +1289,63 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         if not self.is_enabled:
             return False
 
-        # Check NBA live content
-        nba_live = False
+        # Check AFL live content
+        afl_live = False
         if (
-            self.nba_enabled
-            and self.nba_live_priority
-            and hasattr(self, "nba_live")
+            self.afl_enabled
+            and self.afl_live_priority
+            and hasattr(self, "afl_live")
         ):
-            live_games = getattr(self.nba_live, "live_games", [])
+            live_games = getattr(self.afl_live, "live_games", [])
             if live_games:
                 # Filter out any games that are final or appear over
                 live_games = [g for g in live_games if not g.get("is_final", False)]
                 # Additional validation using helper method if available
-                if hasattr(self.nba_live, "_is_game_really_over"):
-                    live_games = [g for g in live_games if not self.nba_live._is_game_really_over(g)]
+                if hasattr(self.afl_live, "_is_game_really_over"):
+                    live_games = [g for g in live_games if not self.afl_live._is_game_really_over(g)]
                 
                 if live_games:
                     # If favorite teams are configured, only return True if there are live games for favorite teams
-                    favorite_teams = getattr(self.nba_live, "favorite_teams", [])
+                    favorite_teams = getattr(self.afl_live, "favorite_teams", [])
                     if favorite_teams:
                         # Check if any live game involves a favorite team
-                        nba_live = any(
+                        afl_live = any(
                             game.get("home_abbr") in favorite_teams
                             or game.get("away_abbr") in favorite_teams
                             for game in live_games
                         )
                     else:
                         # No favorite teams configured, return True if any live games exist
-                        nba_live = True
+                        afl_live = True
 
-        # Check WNBA live content
-        wnba_live = False
+        # Check WAFL live content
+        wafl_live = False
         if (
-            self.wnba_enabled
-            and self.wnba_live_priority
-            and hasattr(self, "wnba_live")
+            self.wafl_enabled
+            and self.wafl_live_priority
+            and hasattr(self, "wafl_live")
         ):
-            live_games = getattr(self.wnba_live, "live_games", [])
+            live_games = getattr(self.wafl_live, "live_games", [])
             if live_games:
                 # Filter out any games that are final or appear over
                 live_games = [g for g in live_games if not g.get("is_final", False)]
                 # Additional validation using helper method if available
-                if hasattr(self.wnba_live, "_is_game_really_over"):
-                    live_games = [g for g in live_games if not self.wnba_live._is_game_really_over(g)]
+                if hasattr(self.wafl_live, "_is_game_really_over"):
+                    live_games = [g for g in live_games if not self.wafl_live._is_game_really_over(g)]
                 
                 if live_games:
                     # If favorite teams are configured, only return True if there are live games for favorite teams
-                    favorite_teams = getattr(self.wnba_live, "favorite_teams", [])
+                    favorite_teams = getattr(self.wafl_live, "favorite_teams", [])
                     if favorite_teams:
                         # Check if any live game involves a favorite team
-                        wnba_live = any(
+                        wafl_live = any(
                             game.get("home_abbr") in favorite_teams
                             or game.get("away_abbr") in favorite_teams
                             for game in live_games
                         )
                     else:
                         # No favorite teams configured, return True if any live games exist
-                        wnba_live = True
+                        wafl_live = True
 
         # Check NCAA Men's live content
         ncaam_live = False
@@ -1405,7 +1405,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                         # No favorite teams configured, return True if any live games exist
                         ncaaw_live = True
 
-        result = nba_live or wnba_live or ncaam_live or ncaaw_live
+        result = afl_live or wafl_live or ncaam_live or ncaaw_live
         
         # Throttle logging when returning False to reduce log noise
         # Always log True immediately (important), but only log False every 60 seconds
@@ -1415,10 +1415,10 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         if should_log:
             if result:
                 # Always log True results immediately
-                self.logger.info(f"has_live_content() returning {result}: nba_live={nba_live}, wnba_live={wnba_live}, ncaam_live={ncaam_live}, ncaaw_live={ncaaw_live}")
+                self.logger.info(f"has_live_content() returning {result}: afl_live={afl_live}, wafl_live={wafl_live}, ncaam_live={ncaam_live}, ncaaw_live={ncaaw_live}")
             else:
                 # Log False results only every 60 seconds
-                self.logger.info(f"has_live_content() returning {result}: nba_live={nba_live}, wnba_live={wnba_live}, ncaam_live={ncaam_live}, ncaaw_live={ncaaw_live}")
+                self.logger.info(f"has_live_content() returning {result}: afl_live={afl_live}, wafl_live={wafl_live}, ncaam_live={ncaam_live}, ncaaw_live={ncaaw_live}")
                 self._last_live_content_false_log = current_time
         
         return result
@@ -1427,7 +1427,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         """
         Return the registered plugin mode name(s) that have live content.
         
-        Returns granular live modes (nba_live, wnba_live, etc.) that have live content.
+        Returns granular live modes (afl_live, wafl_live, etc.) that have live content.
         The plugin is registered with granular modes in manifest.json.
         """
         if not self.is_enabled:
@@ -1435,23 +1435,23 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
 
         live_modes = []
         
-        # Check NBA live content
+        # Check AFL live content
         if (
-            self.nba_enabled
-            and self.nba_live_priority
-            and hasattr(self, "nba_live")
+            self.afl_enabled
+            and self.afl_live_priority
+            and hasattr(self, "afl_live")
         ):
-            live_games = getattr(self.nba_live, "live_games", [])
+            live_games = getattr(self.afl_live, "live_games", [])
             if live_games:
                 # Filter out any games that are final or appear over
                 live_games = [g for g in live_games if not g.get("is_final", False)]
                 # Additional validation using helper method if available
-                if hasattr(self.nba_live, "_is_game_really_over"):
-                    live_games = [g for g in live_games if not self.nba_live._is_game_really_over(g)]
+                if hasattr(self.afl_live, "_is_game_really_over"):
+                    live_games = [g for g in live_games if not self.afl_live._is_game_really_over(g)]
                 
                 if live_games:
                     # Check if favorite teams filter applies
-                    favorite_teams = getattr(self.nba_live, "favorite_teams", [])
+                    favorite_teams = getattr(self.afl_live, "favorite_teams", [])
                     if favorite_teams:
                         # Only include if there are live games for favorite teams
                         if any(
@@ -1459,28 +1459,28 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                             or game.get("away_abbr") in favorite_teams
                             for game in live_games
                         ):
-                            live_modes.append("nba_live")
+                            live_modes.append("afl_live")
                     else:
                         # No favorite teams configured, include if any live games exist
-                        live_modes.append("nba_live")
+                        live_modes.append("afl_live")
         
-        # Check WNBA live content
+        # Check WAFL live content
         if (
-            self.wnba_enabled
-            and self.wnba_live_priority
-            and hasattr(self, "wnba_live")
+            self.wafl_enabled
+            and self.wafl_live_priority
+            and hasattr(self, "wafl_live")
         ):
-            live_games = getattr(self.wnba_live, "live_games", [])
+            live_games = getattr(self.wafl_live, "live_games", [])
             if live_games:
                 # Filter out any games that are final or appear over
                 live_games = [g for g in live_games if not g.get("is_final", False)]
                 # Additional validation using helper method if available
-                if hasattr(self.wnba_live, "_is_game_really_over"):
-                    live_games = [g for g in live_games if not self.wnba_live._is_game_really_over(g)]
+                if hasattr(self.wafl_live, "_is_game_really_over"):
+                    live_games = [g for g in live_games if not self.wafl_live._is_game_really_over(g)]
                 
                 if live_games:
                     # Check if favorite teams filter applies
-                    favorite_teams = getattr(self.wnba_live, "favorite_teams", [])
+                    favorite_teams = getattr(self.wafl_live, "favorite_teams", [])
                     if favorite_teams:
                         # Only include if there are live games for favorite teams
                         if any(
@@ -1488,10 +1488,10 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                             or game.get("away_abbr") in favorite_teams
                             for game in live_games
                         ):
-                            live_modes.append("wnba_live")
+                            live_modes.append("wafl_live")
                     else:
                         # No favorite teams configured, include if any live games exist
-                        live_modes.append("wnba_live")
+                        live_modes.append("wafl_live")
         
         # Check NCAA Men's live content
         if (
@@ -1558,7 +1558,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         Check if a specific league should use scroll mode for this game type.
         
         Args:
-            league: League ID ('nba', 'wnba', 'ncaam', or 'ncaaw')
+            league: League ID ('afl', 'wafl', 'ncaam', or 'ncaaw')
             mode_type: 'live', 'recent', or 'upcoming'
             
         Returns:
@@ -1570,8 +1570,8 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         """Handle display for scroll mode (single league).
         
         Args:
-            display_mode: External mode name (e.g., 'nba_recent')
-            league: League ID ('nba', 'wnba', 'ncaam', or 'ncaaw')
+            display_mode: External mode name (e.g., 'afl_recent')
+            league: League ID ('afl', 'wafl', 'ncaam', or 'ncaaw')
             mode_type: Game type ('live', 'recent', 'upcoming')
             force_clear: Whether to force clear display
             
@@ -1626,7 +1626,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                 self._scroll_prepared[scroll_key] = True
                 self._scroll_active[scroll_key] = True
                 self.logger.info(
-                    f"[Basketball Scroll] Started scrolling {len(games)} {league} {mode_type} games"
+                    f"[Australian Football Scroll] Started scrolling {len(games)} {league} {mode_type} games"
                 )
             else:
                 self._scroll_prepared[scroll_key] = False
@@ -1640,7 +1640,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
             if displayed:
                 # Check if scroll is complete
                 if self._scroll_manager.is_complete(mode_type):
-                    self.logger.info(f"[Basketball Scroll] Cycle complete for {display_mode}")
+                    self.logger.info(f"[Australian Football Scroll] Cycle complete for {display_mode}")
                     # Reset for next cycle
                     self._scroll_prepared[scroll_key] = False
                     self._scroll_active[scroll_key] = False
@@ -1657,13 +1657,13 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
 
     def _display_league_mode(self, league: str, mode_type: str, force_clear: bool) -> bool:
         """
-        Display a specific league/mode combination (e.g., NBA Recent, WNBA Upcoming).
+        Display a specific league/mode combination (e.g., AFL Recent, WAFL Upcoming).
         
         This method displays content from a single league and mode type, used when
-        rotation_order specifies granular modes like 'nba_recent' or 'wnba_upcoming'.
+        rotation_order specifies granular modes like 'afl_recent' or 'wafl_upcoming'.
         
         Args:
-            league: League ID ('nba', 'wnba', 'ncaam', or 'ncaaw')
+            league: League ID ('afl', 'wafl', 'ncaam', or 'ncaaw')
             mode_type: Mode type ('live', 'recent', or 'upcoming')
             force_clear: Whether to force clear display
             
@@ -1830,16 +1830,16 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         """
         self._current_display_mode_type = mode_type
         
-        # Check NBA managers
-        if manager in (getattr(self, 'nba_live', None), 
-                      getattr(self, 'nba_recent', None), 
-                      getattr(self, 'nba_upcoming', None)):
-            self._current_display_league = 'nba'
-        # Check WNBA managers
-        elif manager in (getattr(self, 'wnba_live', None), 
-                        getattr(self, 'wnba_recent', None), 
-                        getattr(self, 'wnba_upcoming', None)):
-            self._current_display_league = 'wnba'
+        # Check AFL managers
+        if manager in (getattr(self, 'afl_live', None), 
+                      getattr(self, 'afl_recent', None), 
+                      getattr(self, 'afl_upcoming', None)):
+            self._current_display_league = 'afl'
+        # Check WAFL managers
+        elif manager in (getattr(self, 'wafl_live', None), 
+                        getattr(self, 'wafl_recent', None), 
+                        getattr(self, 'wafl_upcoming', None)):
+            self._current_display_league = 'wafl'
         # Check NCAA Men's managers
         elif manager in (getattr(self, 'ncaam_live', None), 
                         getattr(self, 'ncaam_recent', None), 
@@ -1876,7 +1876,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         Returns:
             Tuple of (success: bool, actual_mode: Optional[str])
             - success: True if manager displayed content, False otherwise
-            - actual_mode: The actual mode name used for tracking (e.g., 'nba_recent')
+            - actual_mode: The actual mode name used for tracking (e.g., 'afl_recent')
         """
         if not manager:
             return False, None
@@ -1896,7 +1896,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         
         # Build the actual mode name from league and mode_type for accurate tracking
         # This is used to track progress per league separately
-        # Example: 'nba_recent' or 'wnba_live'
+        # Example: 'afl_recent' or 'wafl_live'
         actual_mode = (
             f"{self._current_display_league}_{mode_type}" 
             if self._current_display_league and mode_type 
@@ -2029,7 +2029,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         Checks per-mode duration settings first, then falls back to dynamic calculation.
         
         Args:
-            display_mode: Display mode name (e.g., 'nba_recent')
+            display_mode: Display mode name (e.g., 'afl_recent')
             mode_type: Mode type ('live', 'recent', or 'upcoming')
             
         Returns:
@@ -2079,7 +2079,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         3. Dynamic duration cap applies to both if enabled
         
         Args:
-            display_mode: The display mode to calculate duration for (e.g., 'basketball_live', 'basketball_recent', 'nba_live', 'wnba_recent')
+            display_mode: The display mode to calculate duration for (e.g., 'basketball_live', 'basketball_recent', 'afl_live', 'wafl_recent')
         
         Returns:
             Total expected duration in seconds, or None if not applicable
@@ -2094,7 +2094,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         if not mode_type:
             return None
         
-        # Parse granular mode name if applicable (e.g., "nba_recent", "wnba_upcoming")
+        # Parse granular mode name if applicable (e.g., "afl_recent", "wafl_upcoming")
         league = None
         if "_" in display_mode and not display_mode.startswith("basketball_"):
             # Granular mode: extract league
@@ -2103,10 +2103,10 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                 league = "ncaam"
             elif display_mode.startswith("ncaaw_"):
                 league = "ncaaw"
-            elif display_mode.startswith("nba_"):
-                league = "nba"
-            elif display_mode.startswith("wnba_"):
-                league = "wnba"
+            elif display_mode.startswith("afl_"):
+                league = "afl"
+            elif display_mode.startswith("wafl_"):
+                league = "wafl"
             else:
                 # Try standard split
                 parts = display_mode.split("_", 1)
@@ -2123,10 +2123,10 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                 league = self._current_display_league
             else:
                 # Try to parse from display_mode
-                if display_mode.startswith("nba_"):
-                    league = "nba"
-                elif display_mode.startswith("wnba_"):
-                    league = "wnba"
+                if display_mode.startswith("afl_"):
+                    league = "afl"
+                elif display_mode.startswith("wafl_"):
+                    league = "wafl"
                 elif display_mode.startswith("ncaam_"):
                     league = "ncaam"
                 elif display_mode.startswith("ncaaw_"):
@@ -2159,14 +2159,14 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
             else:
                 # Combined mode - check all enabled leagues
                 if mode_type == 'live':
-                    if self.nba_enabled:
-                        nba_manager = self._get_league_manager_for_mode('nba', 'live')
-                        if nba_manager:
-                            managers_to_check.append(('nba', nba_manager))
-                    if self.wnba_enabled:
-                        wnba_manager = self._get_league_manager_for_mode('wnba', 'live')
-                        if wnba_manager:
-                            managers_to_check.append(('wnba', wnba_manager))
+                    if self.afl_enabled:
+                        afl_manager = self._get_league_manager_for_mode('afl', 'live')
+                        if afl_manager:
+                            managers_to_check.append(('afl', afl_manager))
+                    if self.wafl_enabled:
+                        wafl_manager = self._get_league_manager_for_mode('wafl', 'live')
+                        if wafl_manager:
+                            managers_to_check.append(('wafl', wafl_manager))
                     if self.ncaam_enabled:
                         ncaam_manager = self._get_league_manager_for_mode('ncaam', 'live')
                         if ncaam_manager:
@@ -2176,14 +2176,14 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                         if ncaaw_manager:
                             managers_to_check.append(('ncaaw', ncaaw_manager))
                 elif mode_type == 'recent':
-                    if self.nba_enabled:
-                        nba_manager = self._get_league_manager_for_mode('nba', 'recent')
-                        if nba_manager:
-                            managers_to_check.append(('nba', nba_manager))
-                    if self.wnba_enabled:
-                        wnba_manager = self._get_league_manager_for_mode('wnba', 'recent')
-                        if wnba_manager:
-                            managers_to_check.append(('wnba', wnba_manager))
+                    if self.afl_enabled:
+                        afl_manager = self._get_league_manager_for_mode('afl', 'recent')
+                        if afl_manager:
+                            managers_to_check.append(('afl', afl_manager))
+                    if self.wafl_enabled:
+                        wafl_manager = self._get_league_manager_for_mode('wafl', 'recent')
+                        if wafl_manager:
+                            managers_to_check.append(('wafl', wafl_manager))
                     if self.ncaam_enabled:
                         ncaam_manager = self._get_league_manager_for_mode('ncaam', 'recent')
                         if ncaam_manager:
@@ -2193,14 +2193,14 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                         if ncaaw_manager:
                             managers_to_check.append(('ncaaw', ncaaw_manager))
                 elif mode_type == 'upcoming':
-                    if self.nba_enabled:
-                        nba_manager = self._get_league_manager_for_mode('nba', 'upcoming')
-                        if nba_manager:
-                            managers_to_check.append(('nba', nba_manager))
-                    if self.wnba_enabled:
-                        wnba_manager = self._get_league_manager_for_mode('wnba', 'upcoming')
-                        if wnba_manager:
-                            managers_to_check.append(('wnba', wnba_manager))
+                    if self.afl_enabled:
+                        afl_manager = self._get_league_manager_for_mode('afl', 'upcoming')
+                        if afl_manager:
+                            managers_to_check.append(('afl', afl_manager))
+                    if self.wafl_enabled:
+                        wafl_manager = self._get_league_manager_for_mode('wafl', 'upcoming')
+                        if wafl_manager:
+                            managers_to_check.append(('wafl', wafl_manager))
                     if self.ncaam_enabled:
                         ncaam_manager = self._get_league_manager_for_mode('ncaam', 'upcoming')
                         if ncaam_manager:
@@ -2289,12 +2289,12 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
 
             info = {
                 "plugin_id": self.plugin_id,
-                "name": "Basketball Scoreboard",
+                "name": "Australian Football Scoreboard",
                 "version": "1.3.0",
                 "enabled": self.is_enabled,
                 "display_size": f"{self.display_width}x{self.display_height}",
-                "nba_enabled": self.nba_enabled,
-                "wnba_enabled": self.wnba_enabled,
+                "afl_enabled": self.afl_enabled,
+                "wafl_enabled": self.wafl_enabled,
                 "ncaam_enabled": self.ncaam_enabled,
                 "ncaaw_enabled": self.ncaaw_enabled,
                 "current_mode": current_mode,
@@ -2302,8 +2302,8 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                 "display_duration": self.display_duration,
                 "game_display_duration": self.game_display_duration,
                 "live_priority": {
-                    "nba": self.nba_enabled and self.nba_live_priority,
-                    "wnba": self.wnba_enabled and self.wnba_live_priority,
+                    "afl": self.afl_enabled and self.afl_live_priority,
+                    "wafl": self.wafl_enabled and self.wafl_live_priority,
                     "ncaam": self.ncaam_enabled and self.ncaam_live_priority,
                     "ncaaw": self.ncaaw_enabled and self.ncaaw_live_priority,
                 },
@@ -2323,12 +2323,12 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                 if current_manager
                 else None,
                 "managers_initialized": {
-                    "nba_live": hasattr(self, "nba_live"),
-                    "nba_recent": hasattr(self, "nba_recent"),
-                    "nba_upcoming": hasattr(self, "nba_upcoming"),
-                    "wnba_live": hasattr(self, "wnba_live"),
-                    "wnba_recent": hasattr(self, "wnba_recent"),
-                    "wnba_upcoming": hasattr(self, "wnba_upcoming"),
+                    "afl_live": hasattr(self, "afl_live"),
+                    "afl_recent": hasattr(self, "afl_recent"),
+                    "afl_upcoming": hasattr(self, "afl_upcoming"),
+                    "wafl_live": hasattr(self, "wafl_live"),
+                    "wafl_recent": hasattr(self, "wafl_recent"),
+                    "wafl_upcoming": hasattr(self, "wafl_upcoming"),
                     "ncaam_live": hasattr(self, "ncaam_live"),
                     "ncaam_recent": hasattr(self, "ncaam_recent"),
                     "ncaam_upcoming": hasattr(self, "ncaam_upcoming"),
@@ -2352,7 +2352,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
             self.logger.error(f"Error getting plugin info: {e}")
             return {
                 "plugin_id": self.plugin_id,
-                "name": "Basketball Scoreboard",
+                "name": "Australian Football Scoreboard",
                 "error": str(e),
             }
 
@@ -2455,26 +2455,26 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
 
     def _get_manager_for_mode(self, mode_name: str):
         """Resolve manager instance for a given display mode."""
-        if mode_name.startswith("nba_"):
-            if not self.nba_enabled:
+        if mode_name.startswith("afl_"):
+            if not self.afl_enabled:
                 return None
             suffix = mode_name.split("_", 1)[1]
             if suffix == "live":
-                return getattr(self, "nba_live", None)
+                return getattr(self, "afl_live", None)
             if suffix == "recent":
-                return getattr(self, "nba_recent", None)
+                return getattr(self, "afl_recent", None)
             if suffix == "upcoming":
-                return getattr(self, "nba_upcoming", None)
-        elif mode_name.startswith("wnba_"):
-            if not self.wnba_enabled:
+                return getattr(self, "afl_upcoming", None)
+        elif mode_name.startswith("wafl_"):
+            if not self.wafl_enabled:
                 return None
             suffix = mode_name.split("_", 1)[1]
             if suffix == "live":
-                return getattr(self, "wnba_live", None)
+                return getattr(self, "wafl_live", None)
             if suffix == "recent":
-                return getattr(self, "wnba_recent", None)
+                return getattr(self, "wafl_recent", None)
             if suffix == "upcoming":
-                return getattr(self, "wnba_upcoming", None)
+                return getattr(self, "wafl_upcoming", None)
         elif mode_name.startswith("ncaam_"):
             if not self.ncaam_enabled:
                 return None
@@ -2508,8 +2508,8 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         rankings = {}
         
         # Try to get rankings from each manager
-        for manager_attr in ['nba_live', 'nba_recent', 'nba_upcoming', 
-                            'wnba_live', 'wnba_recent', 'wnba_upcoming',
+        for manager_attr in ['afl_live', 'afl_recent', 'afl_upcoming', 
+                            'wafl_live', 'wafl_recent', 'wafl_upcoming',
                             'ncaam_live', 'ncaam_recent', 'ncaam_upcoming',
                             'ncaaw_live', 'ncaaw_recent', 'ncaaw_upcoming']:
             manager = getattr(self, manager_attr, None)
@@ -2527,7 +2527,7 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         for consistency with football-scoreboard naming.
         
         Args:
-            league: 'nba', 'wnba', 'ncaam', or 'ncaaw'
+            league: 'afl', 'wafl', 'ncaam', or 'ncaaw'
             mode_type: 'live', 'recent', or 'upcoming'
             
         Returns:
@@ -2736,11 +2736,11 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         league = None
         mode_type = None
         if current_mode:
-            if current_mode.startswith('nba_'):
-                league = 'nba'
+            if current_mode.startswith('afl_'):
+                league = 'afl'
                 mode_type = current_mode.split('_', 1)[1]
-            elif current_mode.startswith('wnba_'):
-                league = 'wnba'
+            elif current_mode.startswith('wafl_'):
+                league = 'wafl'
                 mode_type = current_mode.split('_', 1)[1]
             elif current_mode.startswith('ncaam_'):
                 league = 'ncaam'
@@ -2971,10 +2971,10 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                                     start_time = self._single_game_manager_start_times[manager_key]
                                     # Extract league and mode_type from mode_name
                                     league = None
-                                    if mode_name.startswith('nba_'):
-                                        league = 'nba'
-                                    elif mode_name.startswith('wnba_'):
-                                        league = 'wnba'
+                                    if mode_name.startswith('afl_'):
+                                        league = 'afl'
+                                    elif mode_name.startswith('wafl_'):
+                                        league = 'wafl'
                                     elif mode_name.startswith('ncaam_'):
                                         league = 'ncaam'
                                     elif mode_name.startswith('ncaaw_'):
@@ -3018,10 +3018,10 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                             start_time = self._single_game_manager_start_times[manager_key]
                             # Extract league and mode_type from mode_name
                             league = None
-                            if mode_name.startswith('nba_'):
-                                league = 'nba'
-                            elif mode_name.startswith('wnba_'):
-                                league = 'wnba'
+                            if mode_name.startswith('afl_'):
+                                league = 'afl'
+                            elif mode_name.startswith('wafl_'):
+                                league = 'wafl'
                             elif mode_name.startswith('ncaam_'):
                                 league = 'ncaam'
                             elif mode_name.startswith('ncaaw_'):
@@ -3141,17 +3141,17 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
             # Collect single game type for internal plugin scroll mode
             mode_types = [mode_type]
 
-        # Collect NBA games if enabled
-        if self.nba_enabled:
+        # Collect AFL games if enabled
+        if self.afl_enabled:
             league_games = []
             for mt in mode_types:
-                manager = self._get_manager_for_league_mode('nba', mt)
+                manager = self._get_manager_for_league_mode('afl', mt)
                 if manager:
-                    nba_games = self._get_games_from_manager(manager, mt)
-                    if nba_games:
+                    afl_games = self._get_games_from_manager(manager, mt)
+                    if afl_games:
                         # Add league info and ensure status field
-                        for game in nba_games:
-                            game['league'] = 'nba'
+                        for game in afl_games:
+                            game['league'] = 'afl'
                             # Ensure game has status for type determination
                             if 'status' not in game:
                                 game['status'] = {}
@@ -3159,36 +3159,36 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                                 # Infer state from mode_type
                                 state_map = {'live': 'in', 'recent': 'post', 'upcoming': 'pre'}
                                 game['status']['state'] = state_map.get(mt, 'pre')
-                        league_games.extend(nba_games)
-                        self.logger.debug(f"Collected {len(nba_games)} NBA {mt} games for scroll")
+                        league_games.extend(afl_games)
+                        self.logger.debug(f"Collected {len(afl_games)} AFL {mt} games for scroll")
 
             if league_games:
                 games.extend(league_games)
-                leagues.append('nba')
+                leagues.append('afl')
 
-        # Collect WNBA games if enabled
-        if self.wnba_enabled:
+        # Collect WAFL games if enabled
+        if self.wafl_enabled:
             league_games = []
             for mt in mode_types:
-                manager = self._get_manager_for_league_mode('wnba', mt)
+                manager = self._get_manager_for_league_mode('wafl', mt)
                 if manager:
-                    wnba_games = self._get_games_from_manager(manager, mt)
-                    if wnba_games:
+                    wafl_games = self._get_games_from_manager(manager, mt)
+                    if wafl_games:
                         # Add league info and ensure status field
-                        for game in wnba_games:
-                            game['league'] = 'wnba'
+                        for game in wafl_games:
+                            game['league'] = 'wafl'
                             # Ensure game has status for type determination
                             if 'status' not in game:
                                 game['status'] = {}
                             if 'state' not in game['status']:
                                 state_map = {'live': 'in', 'recent': 'post', 'upcoming': 'pre'}
                                 game['status']['state'] = state_map.get(mt, 'pre')
-                        league_games.extend(wnba_games)
-                        self.logger.debug(f"Collected {len(wnba_games)} WNBA {mt} games for scroll")
+                        league_games.extend(wafl_games)
+                        self.logger.debug(f"Collected {len(wafl_games)} WAFL {mt} games for scroll")
 
             if league_games:
                 games.extend(league_games)
-                leagues.append('wnba')
+                leagues.append('wafl')
 
         # Collect NCAA Men's games if enabled
         if self.ncaam_enabled:
@@ -3264,14 +3264,14 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         images = self._scroll_manager.get_all_vegas_content_items()
 
         if not images:
-            self.logger.info("[Basketball Vegas] Triggering scroll content generation")
+            self.logger.info("[Australian Football Vegas] Triggering scroll content generation")
             self._ensure_scroll_content_for_vegas()
             images = self._scroll_manager.get_all_vegas_content_items()
 
         if images:
             total_width = sum(img.width for img in images)
             self.logger.info(
-                "[Basketball Vegas] Returning %d image(s), %dpx total",
+                "[Australian Football Vegas] Returning %d image(s), %dpx total",
                 len(images), total_width
             )
             return images
@@ -3316,14 +3316,14 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
         It collects all game types (live, recent, upcoming) organized by league.
         """
         if not hasattr(self, '_scroll_manager') or not self._scroll_manager:
-            self.logger.debug("[Basketball Vegas] No scroll manager available")
+            self.logger.debug("[Australian Football Vegas] No scroll manager available")
             return
 
         # Collect all games (live, recent, upcoming) organized by league
         games, leagues = self._collect_games_for_scroll(mode_type=None)
 
         if not games:
-            self.logger.debug("[Basketball Vegas] No games available")
+            self.logger.debug("[Australian Football Vegas] No games available")
             return
 
         # Count games by type for logging
@@ -3351,11 +3351,11 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
                 f"{count} {gtype}" for gtype, count in game_type_counts.items() if count > 0
             )
             self.logger.info(
-                f"[Basketball Vegas] Successfully generated scroll content: "
+                f"[Australian Football Vegas] Successfully generated scroll content: "
                 f"{len(games)} games ({type_summary}) from {', '.join(leagues)}"
             )
         else:
-            self.logger.warning("[Basketball Vegas] Failed to generate scroll content")
+            self.logger.warning("[Australian Football Vegas] Failed to generate scroll content")
 
     def cleanup(self) -> None:
         """Clean up resources."""
@@ -3363,6 +3363,6 @@ class BasketballScoreboardPlugin(BasePlugin if BasePlugin else object):
             if hasattr(self, "background_service") and self.background_service:
                 # Clean up background service if needed
                 pass
-            self.logger.info("Basketball scoreboard plugin cleanup completed")
+            self.logger.info("Australian Football scoreboard plugin cleanup completed")
         except Exception as e:
             self.logger.error(f"Error during cleanup: {e}")
