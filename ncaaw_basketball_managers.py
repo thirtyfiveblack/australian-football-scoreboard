@@ -7,7 +7,8 @@ from typing import Any, Dict, Optional
 
 import pytz
 
-from basketball import Basketball, BasketballLive
+#from basketball import Basketball, BasketballLive
+from australianfootball import AustralianFootball, AustralianFootballLive
 from sports import SportsRecent, SportsUpcoming
 
 # Constants
