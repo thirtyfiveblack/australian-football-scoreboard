@@ -33,7 +33,7 @@ class BaseAFLManager(AustralianFootball):
             display_manager=display_manager,
             cache_manager=cache_manager,
             logger=self.logger,
-            sport_key="nba",
+            sport_key="afl",
         )
 
         # Check display modes to determine what data to fetch
