@@ -17,7 +17,7 @@ ESPN_NCAAMB_SCOREBOARD_URL = (
 )
 
 
-class BaseNCAAMBasketballManager(Basketball):
+class BaseNCAAMBasketballManager(AustralianFootball):
     """Base class for NCAA Men's Basketball managers with common functionality."""
 
     # Class variables for warning tracking
@@ -271,7 +271,7 @@ class BaseNCAAMBasketballManager(Basketball):
             return data
 
 
-class NCAAMBasketballLiveManager(BaseNCAAMBasketballManager, BasketballLive):
+class NCAAMBasketballLiveManager(BaseNCAAMBasketballManager, AustralianFootballLive):
     """Manager for live NCAA Men's Basketball games."""
 
     def __init__(self, config: Dict[str, Any], display_manager, cache_manager):
