@@ -68,6 +68,9 @@ class ESPNDataSource(DataSource):
             now = datetime.now()
             formatted_date = now.strftime("%Y%m%d")
             url = f"{self.base_url}/{sport}/{league}/scoreboard"
+
+            self.logger.debug(f"Checking for live games URL: {url}")
+            
             response = self.session.get(url, params={"dates": formatted_date, "limit": 1000}, headers=self.get_headers(), timeout=15)
             response.raise_for_status()
             
