@@ -1167,8 +1167,9 @@ class SportsCore(ABC):
                 # ESPN API anchors its schedule calendar to Eastern US time.
                 # Always query using the Eastern date + 1-day lookback to catch
                 # late-night games still in progress from the previous Eastern day.
-                tz = pytz.timezone("America/New_York")
-                now = datetime.now(tz)
+                #tz = pytz.timezone("America/New_York")
+                #now = datetime.now(tz)
+                now = datetime.now()
                 yesterday = now - timedelta(days=1)
                 formatted_date = now.strftime("%Y%m%d")
                 formatted_date_yesterday = yesterday.strftime("%Y%m%d")
