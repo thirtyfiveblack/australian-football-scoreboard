@@ -948,7 +948,7 @@ class SportsCore(ABC):
                 )
                 if use_short_date_format:
                     #game_date = local_time.strftime("%-m/%-d")
-                    game_date = local_time.strftime("%-d/%-m")
+                    game_date = local_time.strftime("%-d-%b")
                 else:
                     # Note: display_manager.format_date_with_ordinal will be handled by plugin wrapper
                     #game_date = local_time.strftime("%m/%d")  # Simplified for plugin
