@@ -135,8 +135,8 @@ class AustralianFootballLive(AustralianFootball, SportsLive):
                                 self.current_game["period_text"] = "Q3"
                             elif self.current_game["period"] == 4:
                                 self.current_game["period_text"] = "Q4"
-                            # Reset clock for next quarter (12:00 for basketball)
-                            minutes, seconds = 12, 0
+                            # Reset clock for next quarter (20:00 for AFL)
+                            minutes, seconds = 20, 0
                         else:
                             # Simulate overtime
                             self.current_game["period"] += 1
