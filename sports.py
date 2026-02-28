@@ -947,10 +947,12 @@ class SportsCore(ABC):
                     "use_short_date_format", False
                 )
                 if use_short_date_format:
-                    game_date = local_time.strftime("%-m/%-d")
+                    #game_date = local_time.strftime("%-m/%-d")
+                    game_date = local_time.strftime("%-d/%-m")
                 else:
                     # Note: display_manager.format_date_with_ordinal will be handled by plugin wrapper
-                    game_date = local_time.strftime("%m/%d")  # Simplified for plugin
+                    #game_date = local_time.strftime("%m/%d")  # Simplified for plugin
+                    game_date = local_time.strftime("%a %-d %b")  # Simplified for plugin
 
             home_record = self._extract_team_record(home_team)
             away_record = self._extract_team_record(away_team)
