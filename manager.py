@@ -1301,8 +1301,8 @@ class AustralianFootballScoreboardPlugin(BasePlugin if BasePlugin else object):
                 # Filter out any games that are final or appear over
                 live_games = [g for g in live_games if not g.get("is_final", False)]
                 # Additional validation using helper method if available
-                if hasattr(self.afl_live, "_is_game_really_over"):
-                    live_games = [g for g in live_games if not self.afl_live._is_game_really_over(g)]
+#                if hasattr(self.afl_live, "_is_game_really_over"):
+#                    live_games = [g for g in live_games if not self.afl_live._is_game_really_over(g)]
                 
                 if live_games:
                     # If favorite teams are configured, only return True if there are live games for favorite teams
