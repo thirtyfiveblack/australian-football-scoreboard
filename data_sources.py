@@ -69,7 +69,8 @@ class ESPNDataSource(DataSource):
             formatted_date = now.strftime("%Y%m%d")
             url = f"{self.base_url}/{sport}/{league}/scoreboard"
 
-            self.logger.debug(f"Checking for live games URL: {url}")
+            #self.logger.debug(f"Checking for live games URL: {url}")
+            self.logger.info(f"Checking for live games URL: {url}")
             
             response = self.session.get(url, params={"dates": formatted_date, "limit": 1000}, headers=self.get_headers(), timeout=15)
             response.raise_for_status()
@@ -81,7 +82,8 @@ class ESPNDataSource(DataSource):
             live_events = [event for event in events 
                           if event.get('competitions', [{}])[0].get('status', {}).get('type', {}).get('state') == 'in']
             
-            self.logger.debug(f"Fetched {len(live_events)} live games for {sport}/{league}")
+            #self.logger.debug(f"Fetched {len(live_events)} live games for {sport}/{league}")
+            self.logger.info(f"Fetched {len(live_events)} live games for {sport}/{league}")
             return live_events
             
         except Exception as e:
