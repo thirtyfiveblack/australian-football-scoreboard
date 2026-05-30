@@ -324,7 +324,8 @@ class AustralianFootballLive(AustralianFootball, SportsLive):
                         away_text = ''
 
                     if away_text:
-                        away_record_x = 3
+#                        away_record_x = 3
+                        away_record_x = display_width - away_record_width - 3
                         self.logger.debug(f"Drawing away ranking '{away_text}' at ({away_record_x}, {record_y})")
                         self._draw_text_with_outline(draw_overlay, away_text, (away_record_x, record_y), record_font)
 
@@ -353,7 +354,8 @@ class AustralianFootballLive(AustralianFootball, SportsLive):
                     if home_text:
                         home_record_bbox = draw_overlay.textbbox((0, 0), home_text, font=record_font)
                         home_record_width = home_record_bbox[2] - home_record_bbox[0]
-                        home_record_x = display_width - home_record_width - 3
+#                        home_record_x = display_width - home_record_width - 3
+                        home_record_x = 3
                         self.logger.debug(f"Drawing home ranking '{home_text}' at ({home_record_x}, {record_y})")
                         self._draw_text_with_outline(draw_overlay, home_text, (home_record_x, record_y), record_font)
 
