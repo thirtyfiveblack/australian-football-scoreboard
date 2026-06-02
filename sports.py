@@ -2195,7 +2195,7 @@ class SportsRecent(SportsCore):
             
             home_score = format_score(game.get("home_score", "0"))
             away_score = format_score(game.get("away_score", "0"))
-            score_text = f"{away_score}-{home_score}"
+            score_text = f"A{away_score}-H{home_score}"
             score_width = draw_overlay.textlength(score_text, font=self.fonts["score"])
             score_x = (display_width - score_width) // 2 + self._get_layout_offset('score', 'x_offset')
             score_y = display_height - 14 + self._get_layout_offset('score', 'y_offset')
