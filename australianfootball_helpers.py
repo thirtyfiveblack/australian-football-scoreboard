@@ -116,6 +116,7 @@ class AustralianFootballHelpers:
             home_team_leaders = home_team.get('leaders', [{}])
             home_team_goals_leaders = next((c for c in home_team_leaders if c.get('name') == 'goals'),None)
             home_team_disposals_leaders = next((c for c in home_team_leaders if c.get('name') == 'disposals'),None)
+            self.logger.info(f"home_team_leaders {home_team_leaders}")
             away_team_leaders = away_team.get('leaders', [{}])
             away_team_goals_leaders = next((c for c in away_team_leaders if c.get('name') == 'goals'),None)
             away_team_disposals_leaders = next((c for c in away_team_leaders if c.get('name') == 'disposals'),None)
