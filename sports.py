@@ -2195,7 +2195,7 @@ class SportsRecent(SportsCore):
             
             home_score = format_score(game.get("home_score", "0"))
             away_score = format_score(game.get("away_score", "0"))
-            score_text = f"A{away_score}-H{home_score}"
+            score_text = f"{away_score}-{home_score}"
             score_width = draw_overlay.textlength(score_text, font=self.fonts["score"])
             score_x = (display_width - score_width) // 2 + self._get_layout_offset('score', 'x_offset')
             score_y = display_height - 14 + self._get_layout_offset('score', 'y_offset')
@@ -2203,6 +2203,17 @@ class SportsRecent(SportsCore):
                 draw_overlay, score_text, (score_x, score_y), self.fonts["score"]
             )
 
+
+            # Draw Leaders if available
+            home_goals_number = game.get('home_goals_leader_number',0)
+            home_goals_name = game.get('home_goals_leader_name',"")
+            home_goals_text = f"Goals: {home_goals_name} ({home_goals_number})"
+            home_goals_width = draw_overlay.textlength(home_goals_text, font=self.fonts['score'])
+            home_goals_x = (display_width - home_goals_width) // 2
+            home_goals_y = (display_height // 2) - 3
+            self._draw_text_with_outline(draw_overlay, home_goals_text, (home_goals_x, home_goals_y), self.fonts['score'])
+            self.logger.info(f"Home Leaders: {home_goals_number} goals, : {home_goals_name}")
+            
             # "Final" text (Top center) with layout offsets
             # Prepend tournament round for March Madness games
             status_text = game.get(
