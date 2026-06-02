@@ -113,8 +113,12 @@ class AustralianFootballHelpers:
             away_team_info = away_team.get('team', {})
 
             # Extract team stats leaders
-            home_team_leaders = home_team.get('leaders', {})
-            away_team_leaders = away_team.get('leaders', {})
+            home_team_leaders = home_team.get('leaders', [{}])
+            home_team_goals_leaders = next((c for c in home_team_leaders if c.get('name') == 'goals'),None)
+            home_team_disposals_leaders = next((c for c in home_team_leaders if c.get('name') == 'disposals'),None)
+            away_team_leaders = away_team.get('leaders', [{}])
+            away_team_goals_leaders = next((c for c in away_team_leaders if c.get('name') == 'goals'),None)
+            away_team_disposals_leaders = next((c for c in away_team_leaders if c.get('name') == 'disposals'),None)
             
             # Build game details
             details = {
@@ -125,8 +129,8 @@ class AustralianFootballHelpers:
                 'home_score': str(home_team.get('score', 0)),
                 #'home_goals_leader_name': home_team_leaders.get('leaders', {}),
                 ###'abbrev': home_team.get('team', {}).get('abbreviation', 'UNK'),
-                'home_goals_leader_number': str(home_team_leaders.get('leaders', {}).get('value', 0)),
-                'home_goals_leader_name': home_team_leaders.get('leaders', {}).get('athlete', {}).get('displayName', 'Unknown Player'),
+                'home_goals_leader_number': str(home_team_goals_leaders.get('leaders', [{}])[0].get('value', 0)),
+                'home_goals_leader_name': home_team_goals_leaders.get('leaders', [{}])[0].get('athlete', {}).get('displayName', 'Unknown Player'),
                 'away_id': away_team_info.get('id'),
                 'away_abbr': away_team_info.get('abbreviation', 'AWAY'),
                 'away_name': away_team_info.get('displayName', 'Away'),
