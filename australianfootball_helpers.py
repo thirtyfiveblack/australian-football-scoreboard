@@ -111,6 +111,10 @@ class AustralianFootballHelpers:
             # Extract team information
             home_team_info = home_team.get('team', {})
             away_team_info = away_team.get('team', {})
+
+            # Extract team stats leaders
+            home_team_leaders = home_team.get('leaders', {})
+            away_team_leaders = away_team.get('leaders', {})
             
             # Build game details
             details = {
@@ -119,6 +123,10 @@ class AustralianFootballHelpers:
                 'home_abbr': home_team_info.get('abbreviation', 'HOME'),
                 'home_name': home_team_info.get('displayName', 'Home'),
                 'home_score': str(home_team.get('score', 0)),
+                #'home_goals_leader_name': home_team_leaders.get('leaders', {}),
+                ###'abbrev': home_team.get('team', {}).get('abbreviation', 'UNK'),
+                'home_goals_leader_number': str(home_team_leaders.get('leaders', {}).get('value', 0)),
+                'home_goals_leader_name': home_team_leaders.get('leaders', {}).get('athlete', {}).get('displayName', 'Unknown Player'),
                 'away_id': away_team_info.get('id'),
                 'away_abbr': away_team_info.get('abbreviation', 'AWAY'),
                 'away_name': away_team_info.get('displayName', 'Away'),
