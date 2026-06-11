@@ -358,8 +358,8 @@ class GameRenderer:
         self._draw_text_with_outline(draw_overlay, score_text, (score_x, score_y), self.fonts['score'])
 
         # Draw Leaders if available
-        home_goals_number = str(game.get('home_goals_leader_number',"0"))
-        home_goals_name = str(game.get('home_goals_leader_name',""))
+        home_goals_number = str(game.get('home_goals_number',"0"))
+        home_goals_name = str(game.get('home_goals_name',""))
         home_goals_text = f"Goals: {home_goals_name} ({home_goals_number})"
         home_goals_width = draw_overlay.textlength(home_goals_text, font=self.fonts['score'])
         home_goals_x = (self.display_width - home_goals_width) // 2
