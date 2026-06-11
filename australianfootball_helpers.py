@@ -114,19 +114,10 @@ class AustralianFootballHelpers:
 
             # Extract team stats leaders
             home_team_leaders = home_team.get('leaders', [])
-            if home_team_leaders.get('name') = 'goals'
-                home_team_goals = home_team_leaders.get('leaders', [])
-                #home_team_goals_number = home_team_goals.get('value', 0)
-                #home_team_goals_name = home_team_goals.get('athlete', {}).get('displayName', 'N/A')
-            if home_team_leaders.get('name') = 'disposals'
-                home_team_disposals = home_team_leaders.get('leaders', [])
-                #home_team_disposals_number = home_team_goals.get('value', 0)
-                #home_team_disposals_name = home_team_goals.get('athlete', {}).get('displayName', 'N/A')            
-            #home_team_goals_leaders = next((g for g in home_team_leaders if g.get('name') == 'goals'),None)
-            #home_team_disposals_leaders = next((d for d in home_team_leaders if d.get('name') == 'disposals'),None)
-            #away_team_leaders = away_team.get('leaders', [])
-            #away_team_goals_leaders = next((g for g in away_team_leaders if g.get('name') == 'goals'),None)
-            #away_team_disposals_leaders = next((d for d in away_team_leaders if d.get('name') == 'disposals'),None)
+            home_team_goals = next((c for c in home_team_leaders if c.get('name') == 'goals'), None)
+            home_team_goals = home_team_goals.get('leaders', [{}])
+            home_team_disposals = next((c for c in home_team_leaders if c.get('name') == 'disposals'), None)
+            home_team_disposals = home_team_disposals.get('leaders', [{}])
             
             # Build game details
             details = {
