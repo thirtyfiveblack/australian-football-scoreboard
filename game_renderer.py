@@ -364,7 +364,7 @@ class GameRenderer:
         home_goals_width = draw_overlay.textlength(home_goals_text, font=self.fonts['score'])
         home_goals_x = (self.display_width - home_goals_width) // 2
         home_goals_y = (self.display_height // 2) - 3
-        self._draw_text_with_outline(draw_overlay, home_goals_text, (home_goals_x, home_goals_y), self.fonts['score'])
+        self._draw_text_with_outline(draw_overlay, home_goals_text, (home_goals_x, home_goals_y), self.fonts['game_renderer'])
         self.logger.info(f"Stats leaders home {home_goals_name} ({home_goals_number}) data from ESPN API...")
         
         # Draw period/status based on game type
