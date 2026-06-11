@@ -113,7 +113,15 @@ class AustralianFootballHelpers:
             away_team_info = away_team.get('team', {})
 
             # Extract team stats leaders
-            #home_team_leaders = home_team.get('leaders', []).get('leaders', [{}])[0]
+            home_team_leaders = home_team.get('leaders', [])
+            if home_team_leaders.get('name') = 'goals'
+                home_team_goals = home_team_leaders.get('leaders', [])
+                #home_team_goals_number = home_team_goals.get('value', 0)
+                #home_team_goals_name = home_team_goals.get('athlete', {}).get('displayName', 'N/A')
+            if home_team_leaders.get('name') = 'disposals'
+                home_team_disposals = home_team_leaders.get('leaders', [])
+                #home_team_disposals_number = home_team_goals.get('value', 0)
+                #home_team_disposals_name = home_team_goals.get('athlete', {}).get('displayName', 'N/A')            
             #home_team_goals_leaders = next((g for g in home_team_leaders if g.get('name') == 'goals'),None)
             #home_team_disposals_leaders = next((d for d in home_team_leaders if d.get('name') == 'disposals'),None)
             #away_team_leaders = away_team.get('leaders', [])
@@ -127,8 +135,10 @@ class AustralianFootballHelpers:
                 'home_abbr': home_team_info.get('abbreviation', 'HOME'),
                 'home_name': home_team_info.get('displayName', 'Home'),
                 'home_score': str(home_team.get('score', 0)),
-                #'home_goals_leader_number': home_team_goals_leaders.get('displayName', "helper130"),
-                #'home_goals_leader_name': home_team_goals_leaders.get('displayName', "helper131"),
+                'home_goals_number': home_team_goals.get('value', 0),
+                'home_goals_name': str(home_team_goals.get('athlete', {}).get('displayName', 'N/A')),
+                'home_disposals_number': home_team_goals.get('value', 0),
+                'home_disposals_name': str(home_team_goals.get('athlete', {}).get('displayName', 'N/A')),
                 'away_id': away_team_info.get('id'),
                 'away_abbr': away_team_info.get('abbreviation', 'AWAY'),
                 'away_name': away_team_info.get('displayName', 'Away'),
