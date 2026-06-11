@@ -113,7 +113,7 @@ class AustralianFootballHelpers:
             away_team_info = away_team.get('team', {})
 
             # Extract team stats leaders
-            #home_team_leaders = home_team.get('leaders', [])
+            #home_team_leaders = home_team.get('leaders', []).get('leaders', [{}])[0]
             #home_team_goals_leaders = next((g for g in home_team_leaders if g.get('name') == 'goals'),None)
             #home_team_disposals_leaders = next((d for d in home_team_leaders if d.get('name') == 'disposals'),None)
             #away_team_leaders = away_team.get('leaders', [])
