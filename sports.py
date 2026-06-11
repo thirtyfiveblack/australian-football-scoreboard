@@ -1074,7 +1074,7 @@ class SportsCore(ABC):
                 "home_abbr": home_abbr,
                 "home_id": home_team["id"],
                 "home_score": home_score,
-                "home_goals_number": home_goals_number.,
+                "home_goals_number": home_goals_number,
                 "home_goals_name": home_goals_name,
                 "home_disposals_number": home_disposals_number,
                 "home_disposals_name": home_disposals_name,
