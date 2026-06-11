@@ -908,6 +908,12 @@ class SportsCore(ABC):
                 (c for c in competitors if c.get("homeAway") == "away"), None
             )
 
+            # Extract team stats leaders
+            home_team_leaders = home_team["leaders"]
+            self.logger.info(f"home_team_leaders: {home_team_leaders}")
+            home_team_goals = next((c for c in home_team_leaders if c.get('name') == 'goals'), None)
+            home_team_disposals = next((c for c in home_team_leaders if c.get('name') == 'disposals'), None)
+            
             if not home_team or not away_team:
                 self.logger.warning(
                     f"Could not find home or away team in event: {game_event.get('id')}"
@@ -1074,10 +1080,10 @@ class SportsCore(ABC):
                 "home_abbr": home_abbr,
                 "home_id": home_team["id"],
                 "home_score": home_score,
-                "home_goals_number": home_goals_number,
-                "home_goals_name": home_goals_name,
-                "home_disposals_number": home_disposals_number,
-                "home_disposals_name": home_disposals_name,
+                "home_goals_number": home_team_goals["leaders"]["value"],
+                "home_goals_name": home_team_goals["leaders"]["athlete"]["displayName"],
+                "home_disposals_number": home_team_disposals["leaders"]["value"],
+                "home_disposals_name": home_team_disposals["leaders"]["athlete"]["displayName"],
                 "home_logo_path": self.logo_dir
                 / Path(f"{LogoDownloader.normalize_abbreviation(home_abbr)}.png"),
                 "home_logo_url": home_logo_url,
