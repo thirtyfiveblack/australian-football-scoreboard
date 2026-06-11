@@ -114,10 +114,11 @@ class AustralianFootballHelpers:
 
             # Extract team stats leaders
             home_team_leaders = home_team.get('leaders', [{}])
-            home_team_goals = next((c for c in home_team_leaders if c.get('name') == 'goals'), None)
-            home_team_goals = home_team_goals.get('leaders', [{}])[0]
-            home_team_disposals = next((c for c in home_team_leaders if c.get('name') == 'disposals'), None)
-            home_team_disposals = home_team_disposals.get('leaders', [{}])[0]
+            self.logger.info(f"home_team_leaders: {home_team_leaders}")
+            home_team_goals1 = next((c for c in home_team_leaders if c.get('name') == 'goals'), None)
+            home_team_goals = home_team_goals1.get('leaders', [{}])[0]
+            home_team_disposals1 = next((c for c in home_team_leaders if c.get('name') == 'disposals'), None)
+            home_team_disposals = home_team_disposals1.get('leaders', [{}])[0]
             
             # Build game details
             details = {
